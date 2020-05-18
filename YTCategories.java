@@ -11,6 +11,7 @@ import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 
 public class YTCategories {
 
+    //Mapper class
     public static class YTMapper extends Mapper<LongWritable, Text, Text, IntWritable> {
         Text categories = new Text();
         @Override
@@ -20,6 +21,7 @@ public class YTCategories {
             if(str.length > 5) {
                 categories.set(str[3]);
             }
+            //Returned as key value pairs
             context.write(categories, new IntWritable(1));
 
         }
@@ -27,6 +29,7 @@ public class YTCategories {
 
     }
 
+    //Reducer class
     public static class YTReducer extends Reducer<Text, IntWritable, Text, IntWritable > {
 
         int sum = 0;
@@ -36,14 +39,16 @@ public class YTCategories {
             for (IntWritable val:values) {
                 sum += val.get();
             }
-
+            //Aggregated result returned as key value pairs
             context.write(key, new IntWritable(sum));
         }
 
     }
 
+    //Driver Code
     public static void main(String[] args) throws IOException, ClassNotFoundException, InterruptedException {
-
+        
+        //Setting HDFS input and output path
         Path inpath=new Path(args[0]);
         Path outpath=new Path(args[1]);
 
@@ -51,7 +56,8 @@ public class YTCategories {
 
         @SuppressWarnings("deprecation")
         Job job=new Job(con);
-
+        
+        //Setting mapper, reducer, jar class
         job.setMapperClass(YTMapper.class);
         job.setReducerClass(YTReducer.class);
         job.setJarByClass(YTCategories.class);
@@ -61,7 +67,8 @@ public class YTCategories {
 
         job.setInputFormatClass(TextInputFormat.class);
         job.setOutputFormatClass(TextOutputFormat.class);
-
+        
+        //Passing HDFS input and output path
         FileInputFormat.addInputPath(job,inpath);
         FileOutputFormat.setOutputPath(job,outpath);
 
